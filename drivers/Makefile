@@ -1,6 +1,8 @@
 TOPDIR = $(realpath ..)
 
 SOURCES = \
+	  blt-copy.c \
+	  blt-line.c \
 	  cia-frame.c \
 	  cia-icr.c \
 	  cia-line.c \
@@ -10,7 +12,8 @@ SOURCES = \
 	  floppy-mfm.c \
 	  keyboard.c \
 	  mouse.c \
-	  serial.c
+	  serial.c \
+	  sprite.c
 
 LIBNAME = drivers.lib
 
