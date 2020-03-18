@@ -9,6 +9,7 @@
 
 static void vRedTask(__unused void *data) {
   for (;;) {
+    portTRAP(1);
     custom.color[0] = 0xf00;
   }
 }

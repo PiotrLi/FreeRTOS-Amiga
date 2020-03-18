@@ -29,6 +29,13 @@ void vPortTrapHandler(struct TrapFrame *frame) {
     frame->sp += memflt ? sizeof(frame->m68000_memacc) : sizeof(frame->m68000);
   }
 
+  if (frame->trapnum == 10) {
+    static uint32_t ile = 0;
+    ile += 1;
+    printf("Byłem: %d\n", ile);
+    return;
+  }
+
   printf("Exception: %s!\n"
          " D0: %08x D1: %08x D2: %08x D3: %08x\n"
          " D4: %08x D5: %08x D6: %08x D7: %08x\n"
