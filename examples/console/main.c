@@ -4,31 +4,34 @@
 #include <interrupt.h>
 #include <stdio.h>
 
-#include <event.h>
 #include <copper.h>
 #include <palette.h>
 #include <bitmap.h>
 #include <sprite.h>
 #include <font.h>
+#include <file.h>
 
 #include "console.h"
+#include "event.h"
+#include "tty.h"
 #include "data/lat2-08.c"
 #include "data/pointer.c"
 
 #define mainINPUT_TASK_PRIORITY 3
 
-static void vInputTask(__unused void *data) {
+static void vInputTask(void *data) {
+  File_t *tty = data;
   for (;;) {
     Event_t ev;
     if (!PopEvent(&ev))
       continue;
     if (ev.type == EV_MOUSE) {
-      ConsolePrintf("MOUSE: x = %d, y = %d, button = %x\n",
-                    ev.mouse.x, ev.mouse.y, ev.mouse.button);
+      FilePrintf(tty, "MOUSE: x = %d, y = %d, button = %x\n",
+                 ev.mouse.x, ev.mouse.y, ev.mouse.button);
       SpriteUpdatePos(&pointer_spr, HP(ev.mouse.x), VP(ev.mouse.y));
     } else if (ev.type == EV_KEY) {
-      ConsolePrintf("KEY: ascii = '%c', code = %x, modifier = %x\n",
-                    ev.key.ascii, ev.key.code, ev.key.modifier);
+      FilePrintf(tty, "KEY: ascii = '%c', code = %02x, modifier = %02x\n",
+                 ev.key.ascii, ev.key.code, ev.key.modifier);
     }
   }
 }
@@ -83,12 +86,11 @@ int main(void) {
   EnableDMA(DMAF_RASTER|DMAF_SPRITE);
 
   EventQueueInit();
-  MouseInit(0, 0, screen_bm.width - 1, screen_bm.height - 1);
-  KeyboardInit();
-
+  MouseInit(PushMouseEventFromISR, 0, 0, 319, 255);
+  KeyboardInit(PushKeyEventFromISR);
   ConsoleInit(&screen_bm, &console_font);
 
-  xTaskCreate(vInputTask, "input", configMINIMAL_STACK_SIZE, NULL,
+  xTaskCreate(vInputTask, "input", configMINIMAL_STACK_SIZE, TtyOpen(),
               mainINPUT_TASK_PRIORITY, &input_handle);
 
   vTaskStartScheduler();

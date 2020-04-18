@@ -72,13 +72,6 @@ void SerialPutChar(char data) {
   }
 }
 
-void SerialPrint(const char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  kvprintf(SerialPutChar, fmt, ap);
-  va_end(ap);
-}
-
 int SerialGetChar(void) {
   char cRecv;
   xQueueReceive(RecvQ, (void *)&cRecv, portMAX_DELAY);
